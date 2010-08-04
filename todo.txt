@@ -1,0 +1,8 @@
+1. produce plot from existing data
+2. store data in a DB
+3. ingest data conveniently
+4. draw best-fit line
+5. draw trend line (smooth exponential decay weighted average)
+6. graph different time windows easily
+7. web frontend?
+
