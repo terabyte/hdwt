@@ -1,0 +1,167 @@
+#!/usr/bin/perl
+$^W=1;
+use strict;
+
+# Got from:
+# http://www.test.balug.org/mpaoli/processstats
+#
+
+# used for exponential backoff weighted averages
+my $n_years_earlier=12;
+my $n_years_earlier_weighting=.5;
+# with $n_years_earlier and $n_years_earlier_weighting, stats that are
+# $n_years_earlier years older are weighted $n_years_earlier_weighting as much
+# e.g. with 12 and .5, stats that are 12 years older are weighted 1/2 as much
+
+my %crimestats=();
+my %population=();
+my %yearsweight=();
+#my @crimesweighting=(
+#	['HOMI',	100],
+#	['RAPE',	50],
+#	['ROB',		40],
+#	['ASSLT',	40],
+#	['BURG',	45],
+#	['THFT',	35],
+#	['ATHFT',	25],
+#	['ARSON',	40]
+#);
+my @crimesweighting=(
+	['HOMI',	90],
+	['RAPE',	45],
+	['ROB',		40],
+	['ASSLT',	35],
+	['BURG',	40],
+	['THFT',	30],
+	['ATHFT',	20],
+	['ARSON',	10]
+);
+
+# suck up our raw data, do initial processing and loading
+for (@ARGV){
+	if(/^(?:19[89]\d|200\d)$/){
+		open(F,'<',$_) or die "$0: failed to open $_\n";
+		my $year=$_;
+		$yearsweight{$year}=undef;
+		while(<F>){
+			/^[0-9][0-9]\s/ or next;
+			@_=split;
+			$#_ == 8 or die "$0: unexpected number of fields";
+			for(@_){
+				/^-$/ and $_=0;
+				/^(?:0|[1-9][0-9]*)$/ or die "$0: bad field: $_";
+			};
+			my $tract=shift(@_);
+			${crimestats{$tract}}{$year} = [@_];
+		};
+		close(F) or die "$0: failed to close";
+	}elsif($_ eq 'POPULATION'){
+		open(F,'<',$_) or die "$0: failed to open $_\n";
+		while(<F>){
+			/^[0-9][0-9]\s/ or next;
+			@_=split;
+			$#_ == 1 or die "$0: unexpected number of fields";
+			for(@_){
+				/^(?:0|[1-9][0-9]*)$/ or die "$0: bad field: $_";
+			};
+			my $tract=shift(@_);
+			$population{$tract} = $_[0];
+		};
+		close(F) or die "$0: failed to close";
+	};
+};
+
+# used for exponential backoff time weighted averaging
+# $base**$n_years_earlier==$n_years_earlier_weighting
+my $base=exp((1/$n_years_earlier)*log($n_years_earlier_weighting));
+
+# determine weighting for each year
+my $mostcurrentyear=(sort {$a <=> $b;} (keys %yearsweight))[-1];
+for(keys %yearsweight){
+	$yearsweight{$_}=$base**($mostcurrentyear-$_);
+};
+
+#for(sort {$a <=>$b;} (keys %yearsweight)){
+#	print "\$yearsweight{$_}=$yearsweight{$_}\n";
+#};
+
+# determine time weighted averages
+#for my $tract (sort(keys %crimestats)){
+for my $tract (keys %crimestats){
+	my @twa=(); #Time Weighted Average
+	my $totalweight=0;
+	for my $year (keys(%{$crimestats{$tract}})){
+		$totalweight+=$yearsweight{$year};
+		if(@twa){
+			#my $n=0;
+			#for(@{${$crimestats{$tract}}{$year}}){
+			#	$twa[$n++]+=$_*$yearsweight{$year};
+			#};
+			for(0..$#{${$crimestats{$tract}}{$year}}){
+				$twa[$_]+=${${$crimestats{$tract}}{$year}}[$_]*$yearsweight{$year};
+			};
+		}else{
+			for(@{${$crimestats{$tract}}{$year}}){
+				push(@twa,$_*$yearsweight{$year});
+			};
+		};
+	};
+	for(0..$#twa){
+		$twa[$_]/=$totalweight;
+	};
+	${crimestats{$tract}}{'twa'} = [@twa];
+};
+
+my %yuck=();
+
+#headers
+my $rsformat='8s'; #right justified string format
+my $lsformat="-$rsformat"; #left justified string format
+my $rfformat='8.3f'; #right justified float format
+my $lfformat="-$rfformat"; #left justified float format
+printf("%${lsformat}",'TRACT');
+printf("%${lsformat}",'YUCK');
+for(0..$#crimesweighting){
+	printf("%${lsformat}",$crimesweighting[$_][0]);
+};
+print "\n";
+printf("%${lsformat}",'');
+printf("%${lsformat}",'WEIGHT');
+for(0..$#crimesweighting){
+	printf("%${rfformat}",$crimesweighting[$_][1]);
+};
+print "\n";
+
+for my $tract (sort(keys %crimestats)){
+	if(exists($population{$tract})){
+		#print "$tract ";
+		my $yuck=0;
+		for(0..$#{${crimestats{$tract}}{'twa'}}){
+			$yuck+=${crimestats{$tract}}{'twa'}[$_]*$crimesweighting[$_][1];
+		};
+		$yuck/=$population{$tract};
+		#printf(" %10.3f",$yuck);
+		$yuck{$tract}=$yuck;
+		#for(@{${$crimestats{$tract}}{'twa'}}){
+		#	printf(" %7.3f",$_);
+		#	printf(" %7.3f",1000*$_/$population{$tract});
+		#};
+		#print "\n";
+	};
+};
+
+my $maxyuck=undef;
+#from highest to lowest yuck factor
+for (sort {$yuck{$b} <=> $yuck{$a}} (keys %yuck)){
+	if(!defined($maxyuck)){
+		$maxyuck=$yuck{$_};
+	};
+	printf("%${lsformat}",$_); #tract
+	printf("%${rfformat}",100*$yuck{$_}/$maxyuck); #normalized yuck
+	my $tract=$_;
+	for(@{${$crimestats{$_}}{'twa'}}){
+		#individuat twa stats adjusted to per 1000 population
+		printf("%${rfformat}",1000*$_/$population{$tract});
+	};
+	print "\n";
+};
