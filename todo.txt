@@ -1,8 +1,6 @@
-1. produce plot from existing data
-2. store data in a DB
-3. ingest data conveniently
-4. draw best-fit line
-5. draw trend line (smooth exponential decay weighted average)
-6. graph different time windows easily
-7. web frontend?
+1. Draw red/green fill above/below trend line
+2. Better UI for adding/removing data
+3. Draw best-fit line
+4. graph different time windows more easily?
+5. web frontend?
 
