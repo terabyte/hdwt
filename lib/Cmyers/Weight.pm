@@ -95,8 +95,8 @@ sub recalculateAll {
 sub addDataPoint {
     my ($this, $time, $value) = @_;
 
-    my $parsedTime = str2time($time);
-#    print "Parsed Time: $parsedTime\n";
+    my $parsedTime = str2time($time) || $time;
+    print "Parsed Time: $parsedTime\n";
     $this->{'_db'}->{'weight'}->{$parsedTime} = $value;
     # when a point is added, any points after it must be recalculated.
     $this->_calculateAtTime($parsedTime);
