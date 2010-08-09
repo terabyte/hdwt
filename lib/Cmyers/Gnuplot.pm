@@ -458,6 +458,9 @@ sub _setChart
         {
             print PLT "set $attr $self->{$attr}\n";
         }
+        elsif ($attr eq 'fillstyle') {
+            print PLT "set style fill $self->{$attr}\n";
+        }
         # Non-gnuplot options / options specially treated before
         elsif (!grep(/^$attr$/, qw(
                 gnuplot

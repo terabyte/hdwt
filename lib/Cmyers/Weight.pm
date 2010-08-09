@@ -194,6 +194,9 @@ sub _generateGraph {
             'type' => 'dash',
             'width' => 1,
         },
+        # Custom implemented options
+        'fillstyle' => 'solid 1.0 noborder',
+
     );
 
     my $weightDataSet = Chart::Gnuplot::DataSet->new(
@@ -217,7 +220,19 @@ sub _generateGraph {
         'timefmt' => '%s',
     );
 
-    $chart->plot2d($weightDataSet, $emaDataSet);
+#    my $above = Chart::Gnuplot::DataSet->new(
+#        'xdata' => $timeData,
+#        'ydata' => $emaData,
+#        'style' => 'lines',
+#        'linetype' => 1,
+#        'color' => '#000033',
+#        'width' => 1,
+#        'timefmt' => '%s',
+#    );
+
+#    $above->{'style'} = 'filledcurves above';
+
+    $chart->plot2d($weightDataSet, $emaDataSet); #, $above);
 
 }
 

@@ -14,9 +14,8 @@ MAIN {
 
     $weight->readDB();
 
-    # change hl
-    $weight->{'halfLife'} = 7*24*60*60;
-    $weight->recalculateAll();
+    my $val = '316.2';
+    $weight->addDataPoint(time(), $val);
 
     $weight->writeDB();
     $weight->graph("weight.png");
