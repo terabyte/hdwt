@@ -27,6 +27,7 @@ Readonly my $DEFAULT_ARGS => {
     'defaultHeight' => 768,
     'defaultWidth' => 1400,
     'dbFile' => 'weight.db',
+    'outputFile' => 'weight.png',
     'printData' => 0,
     'startDate' => undef,
     'endDate' => undef,
@@ -69,6 +70,7 @@ sub _parseArgs {
 sub graph {
     my ($this, $file) = @_;
 
+    my $file ||= $this->{'outputFile'};
     $this->_generateGraph($file);
 }
 

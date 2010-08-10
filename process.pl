@@ -17,6 +17,7 @@ MAIN {
     );
     my $weight = Cmyers::Weight->new({
         'dbFile' => '/home/cmyers/gitrepos/weight/weight.db',
+        'outputFile' => '/home/cmyers/gitrepos/weight/weight.png',
         'printData' => 1,
         'startDate' => undef, #str2time('05-05-2008'),
         'endDate' => undef,
@@ -31,7 +32,13 @@ MAIN {
     }
 
     $weight->writeDB();
-    $weight->graph("weight.png");
+
+    $weight->graph();
+
+    # print 2nd graph
+    $weight->{'startDate'} = str2time('05-05-2010');
+    $weight->{'outputFile'} = '/home/cmyers/gitrepos/weight/weight-all.png';
+    $weight->graph();
 
     exit 0;
 };
