@@ -36,7 +36,7 @@ MAIN {
     $weight->graph();
 
     # print 2nd graph
-    $weight->{'startDate'} = str2time('05-05-2010');
+    $weight->{'startDate'} = str2time('05-11-2010');
     $weight->{'outputFile'} = '/home/cmyers/gitrepos/weight/weight-all.png';
     $weight->graph();
 
