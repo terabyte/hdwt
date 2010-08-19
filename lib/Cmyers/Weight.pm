@@ -104,6 +104,23 @@ sub addDataPoint {
     $this->_calculateAtTime($parsedTime);
 }
 
+sub deleteDataPoint {
+    my ($this, $time) = @_;
+
+    my $parsedTime = str2time($time) || $time;
+
+    if ( $this->{'_db'}->{'weight'}->{$parsedTime} ) {
+
+        my $value = $this->{'_db'}->{'weight'}->{$parsedTime};
+        print "Deleting point: $parsedTime, $value\n";
+        delete $this->{'_db'}->{'weight'}->{$parsedTime};
+        return;
+    }
+
+    print "Didn't find time $parsedTime, couldn't delete\n";
+}
+
+
 sub readSimpleFile {
     my ($this, $file) = @_;
 

@@ -11,10 +11,13 @@ use Date::Parse;
 MAIN {
 
     my $newVal;
+    my $delTime;
 
     my $status = GetOptions(
         'weight=s' => \$newVal,
+        'delete=s' => \$delTime,
     );
+
     my $weight = Cmyers::Weight->new({
         'dbFile' => '/home/cmyers/gitrepos/weight/weight.db',
         'outputFile' => '/home/cmyers/gitrepos/weight/weight.png',
@@ -24,6 +27,10 @@ MAIN {
     });
 
     $weight->readDB();
+
+    if ($delTime) {
+        $weight->deleteDataPoint($delTime);
+    }
 
     if ($newVal) {
         my $time = time();
