@@ -23,7 +23,7 @@ use Data::Dumper;
 Readonly my $DEFAULT_ARGS => {
     'halfLife' => 7*24*60*60, # data decay halflife, in seconds
     'defaultStartOffset' => -1*30*24*60*60, # 1 month ago
-    'defaultEndOffset' => 0, # 10 seconds in the future
+    'defaultEndOffset' => 300, # now + 5 mins for clock skew
     'defaultHeight' => 768,
     'defaultWidth' => 1400,
     'dbFile' => 'weight.db',
@@ -291,7 +291,7 @@ sub _getDateRange {
     }
     if ( ! defined $endDate ) {
         # default to tomorrow
-        $endDate = $max + $this->{'defaultEndOffset'};
+        $endDate = time() + $this->{'defaultEndOffset'};
     }
 
     print "Using '$startDate' and '$endDate'\n";
