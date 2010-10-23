@@ -26,6 +26,7 @@ Readonly my $DEFAULT_ARGS => {
     'defaultEndOffset' => 300, # now + 5 mins for clock skew
     'defaultHeight' => 768,
     'defaultWidth' => 1400,
+    'widthPerMonth' => undef, # with to use for each month displayed
     'dbFile' => 'weight.db',
     'outputFile' => 'weight.png',
     'printData' => 0,
@@ -191,6 +192,15 @@ sub _generateGraph {
     # Another way is fixed
     my $xsize = $this->{'defaultWidth'};
     my $ysize = $this->{'defaultHeight'};
+
+    # if provided, override with a width of at least this many pixels per month
+    # we are showing.
+    if ( $this->{'widthPerMonth'} ) {
+        my $newxsize = ($endDate - $startDate)/(60*60*24*30)*$this->{'widthPerMonth'};
+        if ($newxsize > $xsize) {
+            $xsize = $newxsize;
+        }
+    }
 
     my $fakeXSize = $xsize / 720; # given in terms of default width, which I think is this.
     my $fakeYSize = $ysize / 504; # given in terms of default height, which I think is this.

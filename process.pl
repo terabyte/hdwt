@@ -45,6 +45,7 @@ MAIN {
     # print 2nd graph
     $weight->{'startDate'} = str2time('05-11-2010');
     $weight->{'outputFile'} = '/home/cmyers/gitrepos/weight/weight-all.png';
+    $weight->{'widthPerMonth'} = 350;
     $weight->graph();
 
     exit 0;
