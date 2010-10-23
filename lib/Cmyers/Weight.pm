@@ -268,15 +268,17 @@ sub _generateGraph {
 sub _getXTics {
     my ($startDate, $endDate) = @_;
 
-    # 1281338014 is a monday
-    # if $date / (24*60*60) % 7 == 3, it is a Sunday.
     my $xTics = [];
     my $curDate = $startDate;
+    $curDate = int($curDate / (24*60*60));
+    $endDate = int($endDate / (24*60*60));
+
     while ($curDate < $endDate ) {
-        if ($curDate / (24*60*60) % 7 == 3) {
-            push @{$xTics}, $curDate;
+        # $daysSinceEpoc mod 7 == 1 on sunday.
+        if ($curDate % 7 == 1) {
+            push @{$xTics}, $curDate*(24*60*60);
         }
-        $curDate += 24*60*60;
+        $curDate += 1;
     }
     return $xTics;
 }
