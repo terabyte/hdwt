@@ -71,7 +71,7 @@ sub _parseArgs {
 sub graph {
     my ($this, $file) = @_;
 
-    my $file ||= $this->{'outputFile'};
+    $file ||= $this->{'outputFile'};
     $this->_generateGraph($file);
 }
 
